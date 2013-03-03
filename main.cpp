@@ -9,7 +9,7 @@ int main()
 {
 	using namespace std;
 	BigNum cislo;
-	cislo.setNum("12345678.9123");
+	cislo.setNum("001234.567890000000");
 	cislo.print();
 	/*
 	   int x = 2147483647, y = 100;

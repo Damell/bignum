@@ -57,42 +57,56 @@ void BigNum::setNum(const char * str)
 	{
 		sign = +1;
 	}
-	while ( str[0] == '0' ) // vymaz pocatecni nuly
+	int length = strlen(str);
+	int dot = 0;
+	for( int i = 0; i < length; i++) // najdi desetinnou tecku, pokud existuje
+	{
+		if (str[length - i - 1]=='.') // osetri dve tecky
+		{
+			if (dot)
+			{
+				error();
+			}
+			exp = - i;	
+			dot = 1;
+		}
+	}
+	while ( str[0] == '0' || str[0] == '.') // vymaz pocatecni nuly
 	{
 		str++;
+		length--;
 	}
-	int length = strlen(str);
 	while ( str[ length - 1 ] == '0' ) // vymaz zaverecne nuly
 	{
 		exp++;
 		length--;
 	}
-	bool dot = false;
-	for( int i = 0; i < length; i++) // najdi desetinnou tecku, pokud existuje
-	{
-		if (str[length - i - 1]=='.') // osetri dve tecky
-		{
-			if (dot == true)
-			{
-				error();
-			}
-			exp = - i - exp;	
-			dot = true;
-		}
+	// zjisteni vyplne nulou a upraveni exponentu, tak aby desetinna tecka vychazela na okraj casti
+	int padding = exp % BASE;
+	if(padding<0)
+	{ 
+		padding += BASE;
 	}
-	n_parts = length/BASE + 1;
-	cout << BASE << endl;
+	exp -= padding;
+	// zjisteni potrebneho poctu casti
+	n_parts = (length + padding - dot - 1) / BASE + 1;
+	// alokace potrebneho poctu casti 
 	number = new int [n_parts];
+	dot = 0;
 	for ( int i = 0; i < n_parts; i++ )
 	{
 		number[i] = 0;
-		for ( int j = 0; j < length - i * BASE && j < BASE; j++ )
+
+		for ( int j = i * BASE; j < BASE * ( i + 1) && j < length + padding - dot; j++ )
 		{
-			if(str[length - 1 - (i * BASE) - j] == '.')
+			if(j >= padding)
 			{
-				length --;
+				if(str[length - 1 - j + padding] == '.')
+				{
+					dot = 1;
+				}
+				number[i] += powerOfTen(j - i * BASE) * ctoi(str[length - 1 - j + padding - dot]);
 			}
-			number[i] += powerOfTen(j) * ctoi(str[length - 1 - (i * BASE) - j]);
 		}
 	}
 }
@@ -125,21 +139,55 @@ BigNum BigNum::operator+(const BigNum & b) const
 
 void BigNum::print(void)
 {
-	int dotpart = - exp / BASE;
 	if(sign == -1)
 	{
 		cout << '-';
 	}
+	int dotpart = -exp / BASE;
+	bool dotprinted = false;
+	cout << exp << endl << dotpart << endl;
+	cout << n_parts << endl;
+	for(int i = 0; i < n_parts; i++)
+	{
+		cout << number[i] << endl;
+	}
+	cout << "------" << endl;
+	if(exp<0 && dotpart >= n_parts)
+	{
+		cout << "0.";
+		dotprinted = true;
+	}
+
+	for(int i = 0; i < dotpart - n_parts; i++)
+	{
+		for(int j = 0; j < BASE; j++)
+		{
+			cout << "0";
+		}
+	}
+	cout.fill('0');
 	for(int i = n_parts-1; i >= 0; i--)
 	{
-		if(exp < 0 && dotpart == i) // vypis casti s desetinnou teckou
+		if(i == dotpart - 1) // vypis casti s desetinnou teckou
 		{
-			cout << int(number[i]/powerOfTen(-exp));
 			cout << '.';
-			cout << number[i] - int( number[i] / powerOfTen(-exp) ) * powerOfTen(-exp);
+			dotprinted = true;
 		}
-		else 
+		if(dotprinted && i==0)
 		{
+			int printn = number[i];
+			while(printn % 10 == 0)
+			{
+				printn = printn / 10;
+			}
+			cout << printn;
+		}
+		else
+		{
+			if(dotprinted)
+			{
+				cout.width(9);
+			}
 			cout << number[i];
 		}
 	}
