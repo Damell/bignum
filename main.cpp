@@ -8,16 +8,22 @@
 int main()
 {
 	using namespace std;
-	BigNum cislo;
-	cislo.setNum("001234.567890000000");
-	cislo.print();
-	/*
-	   int x = 2147483647, y = 100;
-	   int a = (x+y)/10;
-	   cout << INT_MAX << endl;
-	   cout << 2147483647 << endl;
-	   cout << x+y << endl;
-	   cout << a << endl;
-	 */
+	BigNum a;
+	a.setNum("11111101.022222222");
+	//a.setNum("11111101.022222222000");
+	a.print();
+	BigNum b;
+	b.setNum("-44444.48");
+	//b.setNum("-44444.48");
+	b.print();
+	cout << "-------------" << endl;
+	BigNum c;
+	c = a + b;
+	// correct 11066656.542222222
+	// my      11066657.457777778
+	c.print();
+
+// 	BigNum b = cislo;  why doesnt work?
+
 	return 0;
 }

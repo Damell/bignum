@@ -9,7 +9,10 @@ using namespace std;
 inline int ctoi(char c){ return int(c) - 48;}
 
 template <class Any>
-inline Any & compare(Any & x, Any & y){ return x > y ? x : y; }
+inline Any & compare(const Any & x, const Any & y) { return x > y ? x : y; }
+
+template <class Any>
+inline Any abs(const Any & x) { return x >= 0 ? x : -x; }
 
 int powerOfTen(int n) // implementovat pres enum
 {
@@ -35,7 +38,7 @@ BigNum::BigNum()
 	number = NULL;
 	exp = 0;
 	n_parts = 0;
-	sign = 0;
+	sign = 1;
 }
 
 BigNum::BigNum(const char * str)
@@ -111,29 +114,173 @@ void BigNum::setNum(const char * str)
 	}
 }
 
+BigNum & BigNum::operator=(const BigNum & b) 
+{
+	this->n_parts = b.n_parts;
+	this->exp = b.exp;
+	this->sign = b.sign;
+	this->number = new int [n_parts];
+	for(int i = 0; i < n_parts; i++)
+	{
+		this->number[i] = b.number[i];
+	}
+	return *this;
+}
+
+void BigNum::checkBoundaries(const int & i, int & x, const BigNum & a, const int & a_min, const int & a_max, int & y, const BigNum & b, const int & b_min, const int & b_max) const
+{
+	if (i > a_max || i < a_min)
+	{
+		x = 0;
+	}
+	else 
+	{
+		x = number[i];
+	}
+	if (i > b_max || i < b_min)
+	{
+		y = 0;
+	}
+	else 
+	{
+		y = b.number[i];
+	}
+}
+
 BigNum BigNum::operator+(const BigNum & b) const 
 {
 	BigNum result;
-	const BigNum * bigger;
-	if(n_parts >= b.n_parts && number[n_parts-1] >= b.number[n_parts-1])
+	// zjisteni potrebneho rozsahu pro alokaci result
+	int min, max;
+	if( exp/BASE <= b.exp/BASE )
 	{
-		bigger = this;
+		min = exp/BASE;
+		result.exp = exp;
 	}
 	else
 	{
-		bigger = &b;
+		min = b.exp/BASE;
+		result.exp = b.exp;
 	}
-	if(bigger->number[n_parts-1] >= BASE * powerOfTen(BASE))
+	if( exp/BASE + n_parts > b.exp/BASE + b.n_parts )
 	{
-		result.n_parts = bigger->n_parts + 1;
+		max = exp/BASE + n_parts;
 	}
 	else
 	{
-		result.n_parts = bigger->n_parts;
+		max = b.exp/BASE + b.n_parts;
 	}
-	result.number = new int [n_parts];
-
-
+	result.n_parts = max - min;
+	int this_min = (result.exp - exp) / BASE;
+	int this_max = this_min + n_parts - 1;
+	int b_min = (result.exp - b.exp) / BASE;
+	int b_max = b_min + b.n_parts - 1;
+	bool flag = true;
+	if(sign == b.sign)
+	{
+		result.sign = sign;
+	}
+	else 
+	{
+		int i = n_parts - 1;
+		while (flag && i >= 0)
+		{
+			int x, y;
+			checkBoundaries(i, x, *this, this_min, this_max, y, b, b_min, b_max);
+			if (i > this_max || i < this_min)
+			{
+				x = 0;
+			}
+			else 
+			{
+				x = number[i];
+			}
+			if (i > b_max || i < b_min)
+			{
+				y = 0;
+			}
+			else 
+			{
+				y = b.number[i];
+			}
+			if(abs(x) > abs(y))
+			{
+				result.sign = sign;
+				flag = false;
+			}
+			else if (abs(x) < abs(y))
+			{
+				result.sign = b.sign;
+				flag = false;
+			}
+			else
+			{
+				result.n_parts--;
+			}
+			i--;
+		}	
+		if (flag == true)
+		{
+			result.n_parts = 0;
+		}
+	}
+	result.number = new int [result.n_parts](); // inicializace na nulu
+	int max_n = powerOfTen(BASE);
+	int remember = 0;
+	for(int i = 0; i < result.n_parts; i++)
+	{
+		int x, y, help;
+		checkBoundaries(i, x, *this, this_min, this_max, y, b, b_min, b_max);
+		x *= sign;
+		y *= b.sign;
+		// pokud jsou obe cisla kladna
+		if(x >= 0 && y >= 0)
+		{
+			help = x - max_n + y + remember;
+			if(help>=0)
+			{
+				result.number[i] = help;
+				remember = 1;
+			}
+			else
+			{
+				result.number[i] = x + y + remember;
+			}
+		}	
+		// pokud jsou obe zaporna
+		else if(x < 0 && y < 0)
+		{
+			help = x + max_n + y + remember;
+			if(help<=0)
+			{
+				result.number[i] = help;
+				remember = -1;
+			}
+			else
+			{
+				result.number[i] = x + y + remember;
+			}
+		}
+		// pokud jsou rozdilneho znamenka
+		else 
+		{
+			result.number[i] = x + y + remember;
+			if (result.number[i] < 0 && sign > 0)
+			{
+				result.number[i] += max_n;
+				remember = -1;
+			}
+			else if (result.number[i] > 0 && sign < 0)
+			{
+				result.number[i] -= max_n;
+				remember = 1;
+			}
+		}
+		if (result.number[i] < 0)
+		{
+			result.number[i] *= -1;
+		}
+	}
 	return result;
 }
 
@@ -145,13 +292,6 @@ void BigNum::print(void)
 	}
 	int dotpart = -exp / BASE;
 	bool dotprinted = false;
-	cout << exp << endl << dotpart << endl;
-	cout << n_parts << endl;
-	for(int i = 0; i < n_parts; i++)
-	{
-		cout << number[i] << endl;
-	}
-	cout << "------" << endl;
 	if(exp<0 && dotpart >= n_parts)
 	{
 		cout << "0.";
@@ -176,9 +316,15 @@ void BigNum::print(void)
 		if(dotprinted && i==0)
 		{
 			int printn = number[i];
+			int j = 0;
 			while(printn % 10 == 0)
 			{
-				printn = printn / 10;
+				printn = printn / 10; // nema zde byt exp ++ nebo neco takovyho?
+				j++;
+			}
+			if(dotprinted)
+			{
+				cout.width(BASE - j);
 			}
 			cout << printn;
 		}
@@ -205,7 +351,4 @@ BigNum::~BigNum()
 {
 	delete [] number;
 }
-
-
-
 
