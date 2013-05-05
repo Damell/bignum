@@ -46,18 +46,32 @@ BigNum::BigNum(const char * str)
 	setNum(str);
 }
 
+BigNum::BigNum ( const BigNum & x )
+{
+	this->n_parts = x.n_parts;
+	this->exp = x.exp;
+	this->sign = x.sign;
+	this->number = new int [n_parts];
+	for(int i = 0; i < n_parts; i++)
+	{
+		this->number[i] = x.number[i];
+	}
+}
+
 void BigNum::setNum(const char * str)
 {
 	number = NULL;
 	exp = 0;
 	n_parts = 0;
-	if(str[0]=='-') //nastav pripadne znamenko na zacatku a preskoc ho
+	if ( str[0]=='-' ) //nastav pripadne znamenko na zacatku a preskoc ho
 	{
 		sign = -1;
 		str++;
 	} 
-	else 
+	else
 	{
+		if ( str[0] == '+' )
+			str++;
 		sign = +1;
 	}
 	int length = strlen(str);
@@ -116,6 +130,10 @@ void BigNum::setNum(const char * str)
 
 BigNum & BigNum::operator=(const BigNum & b) 
 {
+	if( number != NULL )
+	{
+		delete [] number;
+	}
 	this->n_parts = b.n_parts;
 	this->exp = b.exp;
 	this->sign = b.sign;
@@ -135,7 +153,7 @@ void BigNum::checkBoundaries(const int & i, int & x, const BigNum & a, const int
 	}
 	else 
 	{
-		x = number[i];
+		x = number[i - a_min];
 	}
 	if (i > b_max || i < b_min)
 	{
@@ -143,7 +161,7 @@ void BigNum::checkBoundaries(const int & i, int & x, const BigNum & a, const int
 	}
 	else 
 	{
-		y = b.number[i];
+		y = b.number[i - b_min];
 	}
 }
 
@@ -171,22 +189,22 @@ BigNum BigNum::operator+(const BigNum & b) const
 		max = b.exp/BASE + b.n_parts;
 	}
 	result.n_parts = max - min;
-	int this_min = (result.exp - exp) / BASE;
+	int this_min = (exp - result.exp) / BASE;
 	int this_max = this_min + n_parts - 1;
-	int b_min = (result.exp - b.exp) / BASE;
+	int b_min = (b.exp - result.exp) / BASE;
 	int b_max = b_min + b.n_parts - 1;
 	bool flag = true;
-	if(sign == b.sign)
+	if(sign == b.sign) // obe cisla jsou stejneho znamenka
 	{
 		result.sign = sign;
 	}
-	else 
+	else // rozdilneho znamenka -> zjistuji jake bude znamenko vysledku
 	{
-		int i = n_parts - 1;
+		int i = result.n_parts - 1;
 		while (flag && i >= 0)
 		{
 			int x, y;
-			checkBoundaries(i, x, *this, this_min, this_max, y, b, b_min, b_max);
+			checkBoundaries(i, x, *this, this_min, this_max, y, b, b_min, b_max); // initialization of x and y, if i is out of boundaries, they are set to zero
 			if (i > this_max || i < this_min)
 			{
 				x = 0;
@@ -265,12 +283,12 @@ BigNum BigNum::operator+(const BigNum & b) const
 		else 
 		{
 			result.number[i] = x + y + remember;
-			if (result.number[i] < 0 && sign > 0)
+			if (result.number[i] < 0 && result.sign > 0)
 			{
 				result.number[i] += max_n;
 				remember = -1;
 			}
-			else if (result.number[i] > 0 && sign < 0)
+			else if (result.number[i] > 0 && result.sign < 0)
 			{
 				result.number[i] -= max_n;
 				remember = 1;
@@ -281,11 +299,62 @@ BigNum BigNum::operator+(const BigNum & b) const
 			result.number[i] *= -1;
 		}
 	}
+	//result.Optimize();
+	return result;
+}
+void BigNum::Optimize ( void )
+{
+	BigNum opt;
+	opt.n_parts = n_parts;
+	opt.exp = exp;
+	opt.sign = sign;
+	int i = 0;
+	while ( number[i] == 0 )
+	{
+		opt.n_parts --;
+		opt.exp -= BASE;
+		i++;
+	}
+	int j = n_parts - 1;
+	while ( number[j] == 0 )
+	{
+		opt.n_parts --;
+		opt.exp -= BASE;
+		j--;
+	}
+	if ( opt.n_parts )
+	{
+		opt.number = new int [ opt.n_parts ];
+		for ( int k = i; k <= j; k++ )
+		{
+			opt.number[ k - i ] = number[ k ];
+		}
+	}
+	*this = opt;
+}
+BigNum BigNum::operator-(const BigNum & b) const 
+{
+	BigNum result;
+	BigNum c = b;
+	if ( c.sign == 1 )
+	{
+		c.sign = -1;
+		result = *this + c;
+	}
+	else 
+	{
+		c.sign = 1;
+		result = *this + c;
+	}
 	return result;
 }
 
-void BigNum::print(void)
+void BigNum::Print ( void ) const
 {
+	if(n_parts == 0)
+	{
+		cout << 0;
+	}
 	if(sign == -1)
 	{
 		cout << '-';
@@ -294,7 +363,7 @@ void BigNum::print(void)
 	bool dotprinted = false;
 	if(exp<0 && dotpart >= n_parts)
 	{
-		cout << "0.";
+		cout << "0";
 		dotprinted = true;
 	}
 
@@ -349,6 +418,9 @@ void BigNum::print(void)
 
 BigNum::~BigNum()
 {
-	delete [] number;
+	if ( number != NULL )
+	{
+		delete [] number;
+	}
 }
 
