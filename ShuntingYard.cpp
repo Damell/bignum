@@ -112,6 +112,7 @@ BigNum ShuntingYard::Result ( void )
 			switch ( op->Show() )
 			{
 				case TIMES:
+					output.push( new BigNum( *a * *b ) );
 					break;
 				case PLUS:
 					output.push( new BigNum( *a + *b ) );
