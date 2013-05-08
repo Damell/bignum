@@ -9,7 +9,7 @@ count:
 	wc -l ./BigNum.h ./BigNum.cpp ./Calculator.h ./Calculator.cpp ./Token.h ./ShuntingYard.h ./ShuntingYard.cpp ./Operator.h
 
 
-
+# compile for windows: i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ ./main.cpp ./BigNum.cpp ./ShuntingYard.cpp ./Calculator.cpp
 #make all nebo make vytvoří veškeré výstupy, generované ze zdrojového kódu.
 #make compile vytvoří binární podobu semestrální práce, výsledek bude uložen do souboru <login>/<login>.
 #make run spustí binární podobu semestrální práce.

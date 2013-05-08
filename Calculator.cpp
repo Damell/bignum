@@ -47,7 +47,7 @@ Calculator & Calculator::operator << ( const string & str )
 		}
 	}
 	sh.End();
-	cout << str;
 	result = sh.Result();
+	cout << str;
 	return *this;
 }

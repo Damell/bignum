@@ -246,7 +246,7 @@ BigNum BigNum::operator+(const BigNum & b) const
 		}
 	}
 	result.number = new int [result.n_parts](); // inicializace na nulu
-	int max_n = powerOfTen(BASE);
+	int max_n = MAX + 1;
 	int remember = 0;
 	for(int i = 0; i < result.n_parts; i++)
 	{
@@ -371,7 +371,6 @@ BigNum BigNum::operator * ( const BigNum & b ) const
 	BigNum result;
 	vector <int> vec;
 	int carry, /*a0, a1, b0, b1, zx, zy,*/ res;
-	int max_n = powerOfTen(BASE);
 	for ( int i = 0; i < n_parts; i++ )
 	{
 		carry = 0;
@@ -415,10 +414,10 @@ BigNum BigNum::operator * ( const BigNum & b ) const
 					carry++;
 					vec.at( i + j ) -= max_n;
 				}*/
-				if ( vec.at( i + j ) > 999999999 )
+				if ( vec.at( i + j ) > MAX )
 				{
 					carry++;
-					vec.at( i + j ) -= max_n;
+					vec.at( i + j ) -= MAX +1;
 				}
 			}
 			else
@@ -484,9 +483,10 @@ void BigNum::Print ( void ) const
 		}
 	}
 	cout.fill('0');
+	bool first = true;
 	for(int i = n_parts-1; i >= 0; i--)
 	{
-		if(i == dotpart - 1) // vypis casti s desetinnou teckou
+		if(i == dotpart - 1 && !dotprinted) // vypis casti s desetinnou teckou
 		{
 			cout << '.';
 			dotprinted = true;
@@ -508,19 +508,20 @@ void BigNum::Print ( void ) const
 		}
 		else
 		{
-			if(dotprinted)
+			if(!first)
 			{
-				cout.width(9); // BASE misto 9 ?
+				cout.width(BASE);
 			}
 			cout << number[i];
-			dotprinted = true;
+			first = false;
+			//dotprinted = true;
 		}
 	}
 	if(exp > 0)
 	{
-		for(int i = 0; i < exp; i++)
+		for(int i = 0; i < exp; i += BASE)
 		{
-			cout.width(9); // BASE misto 9 ?
+			cout.width(BASE);
 			cout << "0";
 		}
 	}

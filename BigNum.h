@@ -7,10 +7,13 @@
 
 #if INT_MAX/1000/1000 < 999
 #define BASE 4
+#define MAX 9999
 #elif INT_MAX/1000/1000/1000/1000/1000 < 999
 #define BASE 9
+#define MAX 999999999
 #elif INT_MAX/1000/1000/1000/1000/1000 > 999
 #define BASE 18
+#define MAX 999999999999999999
 #endif
 
 class BigNum : public Token
