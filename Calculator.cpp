@@ -1,5 +1,4 @@
 // Calculator.cpp
-#include <sstream>
 #include <string>
 #include "Calculator.h"
 #include "ShuntingYard.h"
@@ -12,12 +11,13 @@ inline void getSkipSpaces ( istringstream & is, char & c )
 	} while ( is.good() && c == ' ' );
 }
 
-Calculator & Calculator::operator << ( const string & str )
+Calculator & Calculator::operator << ( string & str )
 {
 	ShuntingYard sh;
-	istringstream is(str);
+	istringstream is (str);
 	string num;
-	char c;
+	char c = is.peek();
+	if ( c == 'q') throw QUIT;
 	bool last_op = true;
 	while(is.good())
 	{
@@ -48,6 +48,5 @@ Calculator & Calculator::operator << ( const string & str )
 	}
 	sh.End();
 	result = sh.Result();
-	cout << str;
 	return *this;
 }

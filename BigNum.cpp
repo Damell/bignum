@@ -214,7 +214,7 @@ BigNum BigNum::operator+(const BigNum & b) const
 			}
 			else 
 			{
-				x = number[i];
+				x = number[i - this_min];
 			}
 			if (i > b_max || i < b_min)
 			{
@@ -222,7 +222,7 @@ BigNum BigNum::operator+(const BigNum & b) const
 			}
 			else 
 			{
-				y = b.number[i];
+				y = b.number[i - b_min];
 			}
 			if(abs(x) > abs(y))
 			{
@@ -299,6 +299,16 @@ BigNum BigNum::operator+(const BigNum & b) const
 				result.number[i] -= max_n;
 				remember = 1;
 			}
+		}
+		if ( ( result.sign == 1 ) && ( result.number[i] < 0 ) )
+		{
+			result.number[i] += max_n;
+			remember--;
+		}
+		else if ( ( result.sign == -1 ) && ( result.number[i] > 0 ) )
+		{
+			result.number[i] -= max_n;
+			remember++;
 		}
 		if (result.number[i] < 0)
 		{
@@ -378,7 +388,7 @@ BigNum BigNum::operator * ( const BigNum & b ) const
 		{
 			long long int x = number[i];
 			long long int y = b.number[j];
-			/*cout << endl << x*y << endl;
+			/*os << endl << x*y << endl;
 			a0 = number[i] & 0x0000ffff;
 			a1 = number[i] >> 16;  // change to macros
 			b0 = b.number[i] & 0x0000ffff;
@@ -387,7 +397,7 @@ BigNum BigNum::operator * ( const BigNum & b ) const
 			zy = ( a0 * b1 );
 			res = ( a0 * b0 ) + ( zx << 16 ) + ( zy << 16 ) + carry;
 			carry = ( zx >> 16 ) + ( zy >> 16 ) + ( a1 * b1 );
-			cout << endl << carry << endl;
+			os << endl << carry << endl;
 			int carry10 = 0;
 			for ( int k = 0; k < 32; k++ )
 			{
@@ -399,7 +409,7 @@ BigNum BigNum::operator * ( const BigNum & b ) const
 					carry /= 10;
 				}
 			}
-			cout << endl << carry << endl;
+			os << endl << carry << endl;
 			res += carry % 1000000000;
 			carry10 += carry / 1000000000;
 			carry = carry10;
@@ -458,42 +468,42 @@ BigNum BigNum::operator * ( const BigNum & b ) const
 	return result;
 }
 
-void BigNum::Print ( void ) const
+ostream & operator << ( ostream & os, const BigNum & n )
 {
-	if(n_parts == 0)
+	if(n.n_parts == 0)
 	{
-		cout << "0";
+		os << "0";
 	}
-	if(sign == -1)
+	if(n.sign == -1)
 	{
-		cout << '-';
+		os << '-';
 	}
-	int dotpart = -exp / BASE;
+	int dotpart = -n.exp / BASE;
 	bool dotprinted = false;
-	if(exp<0 && dotpart >= n_parts)
+	if(n.exp<0 && dotpart >= n.n_parts)
 	{
-		cout << "0.";
+		os << "0.";
 		dotprinted = true;
 	}
-	for(int i = 0; i < dotpart - n_parts; i++)
+	for(int i = 0; i < dotpart - n.n_parts; i++)
 	{
 		for(int j = 0; j < BASE; j++)
 		{
-			cout << "0";
+			os << "0";
 		}
 	}
-	cout.fill('0');
+	os.fill('0');
 	bool first = true;
-	for(int i = n_parts-1; i >= 0; i--)
+	for(int i = n.n_parts-1; i >= 0; i--)
 	{
 		if(i == dotpart - 1 && !dotprinted) // vypis casti s desetinnou teckou
 		{
-			cout << '.';
+			os << '.';
 			dotprinted = true;
 		}
 		if(dotprinted && i==0)
 		{
-			int printn = number[i];
+			int printn = n.number[i];
 			int j = 0;
 			while(printn % 10 == 0 && printn != 0)
 			{
@@ -502,30 +512,31 @@ void BigNum::Print ( void ) const
 			}
 			if(dotprinted)
 			{
-				cout.width(BASE - j);
+				os.width(BASE - j);
 			}
-			cout << printn;
+			os << printn;
 		}
 		else
 		{
 			if(!first)
 			{
-				cout.width(BASE);
+				os.width(BASE);
 			}
-			cout << number[i];
+			os << n.number[i];
 			first = false;
 			//dotprinted = true;
 		}
 	}
-	if(exp > 0)
+	if(n.exp > 0)
 	{
-		for(int i = 0; i < exp; i += BASE)
+		for(int i = 0; i < n.exp; i += BASE)
 		{
-			cout.width(BASE);
-			cout << "0";
+			os.width(BASE);
+			os << "0";
 		}
 	}
-	cout << endl;
+	os << endl;
+	return os;
 }
 
 BigNum::~BigNum()

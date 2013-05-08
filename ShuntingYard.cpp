@@ -139,7 +139,7 @@ BigNum ShuntingYard::Result ( void )
 		}
 		if ( error )
 		{
-			throw 11;
+			throw FALSE_EXPR;
 			return res; // throw exception
 		}
 	}

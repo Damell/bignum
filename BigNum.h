@@ -3,6 +3,7 @@
 #define BIGNUM_H
 
 #include <climits>
+#include <iostream>
 #include "Token.h"
 
 #if INT_MAX/1000/1000 < 999
@@ -15,6 +16,8 @@
 #define BASE 18
 #define MAX 999999999999999999
 #endif
+
+using namespace std;
 
 class BigNum : public Token
 {
@@ -29,7 +32,8 @@ class BigNum : public Token
 		BigNum operator * ( const BigNum & ) const;
 		void Optimize ( void );
 		const bool IsOperator ( void ) const { return false; }
-		void Print( void ) const;
+		//void Print( void ) const;
+		friend ostream & operator << ( ostream &, const BigNum & );
 		~BigNum();
 	private:
 		int * number;
