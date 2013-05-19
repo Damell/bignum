@@ -5,7 +5,6 @@
 #include <stack>
 #include "BigNum.h"
 #include "Operator.h"
-#define FALSE_EXPR 11
 using namespace std;
 
 class ShuntingYard
