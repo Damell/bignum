@@ -3,12 +3,23 @@
 #include "Calculator.h"
 #include "ShuntingYard.h"
 using namespace std;
-inline void getSkipSpaces ( istringstream & is, char & c ) 
+inline bool getSkipSpaces ( istringstream & is, char & c ) 
 {
-	do
+	char x;
+	c = ' ';
+	while ( is.good() && c == ' ' )
 	{
-		c = is.get();
-	} while ( is.good() && c == ' ' );
+		x = is.get();
+		if( is.good() )
+		{
+			if( ((x < '0' || x > '9') && x != '(' && x != ')' && x != '+' && x != '-' && x != '*') || ( x == '.' && c == '.' ))
+			{
+				throw Exception ("Input expression is false, please try again:");
+			}
+		}
+		c = x;
+	}
+	return is.good();
 }
 
 Calculator & Calculator::operator << ( string & str )
@@ -16,24 +27,25 @@ Calculator & Calculator::operator << ( string & str )
 	ShuntingYard sh;
 	istringstream is (str);
 	string num;
-	char c = is.peek();
-	if ( c == 'q') throw QUIT;
-	bool last_op = true;
-	while(is.good())
+	char c, x;
+	bool last_op = true; // tests for two consecutive numbers without operand between them
+	while(getSkipSpaces( is, c ))
 	{
-		getSkipSpaces( is, c );
 		if( (c >= '0' && c <= '9') || (last_op && (c == '-' || c == '+')) )
 		{
 			num = "";
-			while( is.good() && ( (c >= '0' && c <= '9') || c == '.' || (last_op && num.empty() && (c == '-' || c == '+')) ))
+			num += c;
+			x = is.peek();
+			while( is.good() && ( (x >= '0' && x <= '9') || x == '.' || (last_op && num.empty() && (x == '-' || x == '+')) ))
 			{
-				num += c;
 				is.get(c);
+				num += c;
+				x = is.peek();
 			}
 			sh.Add( num );
 			last_op = false;
 		}
-		if( is.good() && ((!last_op && (c == '+' || c == '*' || c == '-' || c == ')' )) || (last_op && c == '(' )))
+		else if( is.good() && ((!last_op && (c == '+' || c == '*' || c == '-' || c == ')' )) || (last_op && c == '(' )))
 		{
 			sh.Add( c );
 			if ( c == ')' )

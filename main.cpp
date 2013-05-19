@@ -22,19 +22,18 @@ int main( int argc, char * argv [] )
 			try
 			{
 				calc << str;
+				cout << "Result: " << calc;
 			}
-			catch ( int x )
+			catch ( Exception e )
 			{
-				cout << "The expression in the entered file is false." << endl;
-				return 0;
+				cout << e;
 			}
-			cout << "Result: " << calc;
 		}
 		return 0;
 	}
 	cout << "Welcome to arbitrary precision calculator" << endl;
 	cout << "To end program, enter \"q\"" << endl;
-	cout << "Please enter arithmetical expression consisting of +, -, * and arbitrarily long precision numbers:" << endl;
+	cout << "Please enter arithmetical expression consisting of '+', '-', '*', '(', ')' and arbitrarily long precision numbers:" << endl;
 	cout << "New expression: ";
 	while(getline( cin, str ))
 	{
@@ -42,17 +41,12 @@ int main( int argc, char * argv [] )
 		try
 		{
 			calc << str;
+			cout << "Result: " << calc;
 		}
-		catch ( int x )
+		catch ( Exception e )
 		{
-			if ( x == FALSE_EXPR )
-			{
-				cout << "You entered false expression, please try again." << endl;
-				cout << "New expression: ";
-				continue;
-			}
+			cout << e;
 		}
-		cout << "Result: " << calc;
 		cout << "New expression: ";
 	}
 	return 0;

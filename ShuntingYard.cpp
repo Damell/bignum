@@ -13,13 +13,6 @@ ShuntingYard & ShuntingYard::Add ( char & c )
 			op_stack.push( op );
 			break;
 		case R_PAR:
-			/*while( !op_stack.empty() )
-			{
-				cout << op_stack.top()->Show() << endl;
-				op_stack.pop();
-			}
-			cout << "<<<<<<<<<<<<<<<" << endl;
-			*/
 			while( !op_stack.empty() && ( op_stack.top()->Show() != L_PAR ) )
 			{
 				output.push( op_stack.top() );
@@ -64,16 +57,6 @@ BigNum ShuntingYard::Result ( void )
 	BigNum * a = NULL, * b = NULL;
 	Operator * op = NULL;
 	bool error = false;;
-	/*while( !output.empty() )
-	{
-		if(!output.top()->IsOperator())
-		(static_cast<BigNum*>(output.top()))->Print();
-		if(output.top()->IsOperator())
-		cout << "Operator: " << (static_cast<Operator*>(output.top()))->Show() << endl;
-		output.pop();
-	}
-	cout << "--------------" << endl;
-	*/
 	while( output.size() != 1 || !h_stack.empty() )
 	{
 		while( !output.empty() )
@@ -139,8 +122,8 @@ BigNum ShuntingYard::Result ( void )
 		}
 		if ( error )
 		{
-			throw FALSE_EXPR;
-			return res; // throw exception
+			throw Exception ("Input expression is false, please try again:");
+			//return res; // throw exception
 		}
 	}
 	res = *(static_cast<BigNum *>(output.top()));

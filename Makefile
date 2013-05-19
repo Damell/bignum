@@ -6,7 +6,7 @@ clean:
 	echo Cistim to tu...
 doc:
 count:
-	wc -l ./BigNum.h ./BigNum.cpp ./Calculator.h ./Calculator.cpp ./Token.h ./ShuntingYard.h ./ShuntingYard.cpp ./Operator.h
+	wc -l ./main.cpp ./BigNum.h ./BigNum.cpp ./Calculator.h ./Calculator.cpp ./Token.h ./ShuntingYard.h ./ShuntingYard.cpp ./Operator.h
 
 
 # compile for windows: i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ ./main.cpp ./BigNum.cpp ./ShuntingYard.cpp ./Calculator.cpp

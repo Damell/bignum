@@ -40,7 +40,22 @@ class BigNum : public Token
 		int exp;
 		int n_parts; 
 		int sign; // -1 for negative, +1 for positive
-		void checkBoundaries(const int & i, int & x, const BigNum & a, const int & a_min, const int & a_max, int & y, const BigNum & b, const int & b_min, const int & b_max) const;
+		int checkBoundaries(const int & i, const BigNum & a, const int & min, const int & max) const;
+};
+
+class Exception {
+	public:
+		Exception ( const string & str )
+		{
+			err = str;
+		}
+		friend ostream & operator << ( ostream & os, const Exception & exc )
+		{
+			os << "Error: " << exc.err << endl;
+			return os;
+		}
+	private:
+	string err;
 };
 
 #endif

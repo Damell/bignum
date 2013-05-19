@@ -13,10 +13,8 @@ using namespace std;
 inline int ctoi(char c){ return int(c) - 48;}
 
 template <class Any>
-inline Any & compare(const Any & x, const Any & y) { return x > y ? x : y; }
-
-template <class Any>
 inline Any abs(const Any & x) { return x >= 0 ? x : -x; }
+
 
 int powerOfTen(int n) // implementovat pres enum
 {
@@ -30,11 +28,6 @@ int powerOfTen(int n) // implementovat pres enum
 		x *= 10;
 	}
 	return x;
-}
-
-int error(void)
-{
-	return 1;
 }
 
 BigNum::BigNum()
@@ -86,7 +79,7 @@ void BigNum::setNum(const char * str)
 		{
 			if (dot)
 			{
-				error();
+				throw Exception ("Number contains two dots, please try again:");
 			}
 			exp = - i;	
 			dot = 1;
@@ -148,23 +141,15 @@ BigNum & BigNum::operator=(const BigNum & b)
 	return *this;
 }
 
-void BigNum::checkBoundaries(const int & i, int & x, const BigNum & a, const int & a_min, const int & a_max, int & y, const BigNum & b, const int & b_min, const int & b_max) const
+int BigNum::checkBoundaries(const int & i, const BigNum & a, const int & min, const int & max) const
 {
-	if (i > a_max || i < a_min)
+	if (i > max || i < min)
 	{
-		x = 0;
+		return 0;
 	}
 	else 
 	{
-		x = number[i - a_min];
-	}
-	if (i > b_max || i < b_min)
-	{
-		y = 0;
-	}
-	else 
-	{
-		y = b.number[i - b_min];
+		return a.number[i - min];
 	}
 }
 
@@ -207,7 +192,8 @@ BigNum BigNum::operator+(const BigNum & b) const
 		while (flag && i >= 0)
 		{
 			int x, y;
-			checkBoundaries(i, x, *this, this_min, this_max, y, b, b_min, b_max); // initialization of x and y, if i is out of boundaries, they are set to zero
+			x = checkBoundaries(i, *this, this_min, this_max); // initialization of x and y, if i is out of boundaries, they are set to zero
+			y = checkBoundaries(i, b, b_min, b_max); // initialization of x and y, if i is out of boundaries, they are set to zero
 			if (i > this_max || i < this_min)
 			{
 				x = 0;
@@ -247,75 +233,74 @@ BigNum BigNum::operator+(const BigNum & b) const
 	}
 	result.number = new int [result.n_parts](); // inicializace na nulu
 	int max_n = MAX + 1;
-	int remember = 0;
+	int carry = 0;
 	for(int i = 0; i < result.n_parts; i++)
 	{
 		int x, y, help;
-		checkBoundaries(i, x, *this, this_min, this_max, y, b, b_min, b_max);
+		x = checkBoundaries(i, *this, this_min, this_max); // initialization of x and y, if i is out of boundaries, they are set to zero
+		y = checkBoundaries(i, b, b_min, b_max); // initialization of x and y, if i is out of boundaries, they are set to zero
 		x *= sign;
 		y *= b.sign;
 		// pokud jsou obe cisla kladna
 		if(x >= 0 && y >= 0)
 		{
-			help = x - max_n + y + remember;
+			help = x - max_n + y + carry;
 			if(help>=0)
 			{
 				result.number[i] = help;
-				remember = 1;
+				carry = 1;
 			}
 			else
 			{
-				result.number[i] = x + y + remember;
-				remember = 0;
+				result.number[i] = x + y + carry;
+				carry = 0;
 			}
 		}	
 		// pokud jsou obe zaporna
 		else if(x < 0 && y < 0)
 		{
-			help = x + max_n + y + remember;
+			help = x + max_n + y + carry;
 			if(help<=0)
 			{
 				result.number[i] = help;
-				remember = -1;
+				carry = -1;
 			}
 			else
 			{
-				result.number[i] = x + y + remember;
-				remember = 0;
+				result.number[i] = x + y + carry;
+				carry = 0;
 			}
 		}
 		// pokud jsou rozdilneho znamenka
 		else 
 		{
-			result.number[i] = x + y + remember;
-			remember = 0;
+			result.number[i] = x + y + carry;
+			carry = 0;
 			if (result.number[i] < 0 && result.sign > 0)
 			{
 				result.number[i] += max_n;
-				remember = -1;
+				carry = -1;
 			}
 			else if (result.number[i] > 0 && result.sign < 0)
 			{
 				result.number[i] -= max_n;
-				remember = 1;
+				carry = 1;
 			}
 		}
+		// if the number is different sign than it should be
 		if ( ( result.sign == 1 ) && ( result.number[i] < 0 ) )
 		{
 			result.number[i] += max_n;
-			remember--;
+			carry--;
 		}
 		else if ( ( result.sign == -1 ) && ( result.number[i] > 0 ) )
 		{
 			result.number[i] -= max_n;
-			remember++;
+			carry++;
 		}
-		if (result.number[i] < 0)
-		{
-			result.number[i] *= -1;
-		}
+		result.number[i] = abs( result.number[i] );
 	}
-	if ( remember )
+	if ( carry )
 	{
 		int * bigger = new int [ ++result.n_parts ];
 		bigger[ result.n_parts - 1 ] = 1;
@@ -329,7 +314,7 @@ BigNum BigNum::operator+(const BigNum & b) const
 	//result.Optimize();
 	return result;
 }
-void BigNum::Optimize ( void )
+void BigNum::Optimize ( void ) // probably obsolete
 {
 	BigNum opt;
 	opt.n_parts = n_parts;
