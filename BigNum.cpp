@@ -194,7 +194,7 @@ BigNum BigNum::operator+(const BigNum & b) const
 			int x, y;
 			x = checkBoundaries(i, *this, this_min, this_max); // initialization of x and y, if i is out of boundaries, they are set to zero
 			y = checkBoundaries(i, b, b_min, b_max); // initialization of x and y, if i is out of boundaries, they are set to zero
-			if (i > this_max || i < this_min)
+			/*if (i > this_max || i < this_min)
 			{
 				x = 0;
 			}
@@ -209,7 +209,7 @@ BigNum BigNum::operator+(const BigNum & b) const
 			else 
 			{
 				y = b.number[i - b_min];
-			}
+			}*/
 			if(abs(x) > abs(y))
 			{
 				result.sign = sign;
@@ -229,11 +229,13 @@ BigNum BigNum::operator+(const BigNum & b) const
 		if (flag == true)
 		{
 			result.n_parts = 0;
+			result.exp = 0;
 		}
 	}
 	result.number = new int [result.n_parts](); // inicializace na nulu
 	int max_n = MAX + 1;
 	int carry = 0;
+	// pokud jsou vysledne casti odzadu nulove, je treba vysledek zmensit
 	for(int i = 0; i < result.n_parts; i++)
 	{
 		int x, y, help;
