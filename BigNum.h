@@ -2,8 +2,12 @@
 #ifndef BIGNUM_H
 #define BIGNUM_H
 
-#include <climits>
 #include <iostream>
+#include <string>
+#include <cstdlib>
+#include <vector>
+#include <climits>
+#include <deque>
 #include "Token.h"
 
 #if INT_MAX/1000/1000 < 999
@@ -19,13 +23,16 @@
 
 using namespace std;
 
+const bool PLUS_SIGN = true;
+const bool MINUS_SIGN = false;
+
 class BigNum : public Token
 {
 	public:
 		BigNum ( void );
-		BigNum ( const char * str ); // inicializace retezcem
+		BigNum ( const string & str ); // inicializace retezcem
 		BigNum ( const BigNum & );
-		void setNum ( const char * str);
+		void setNum ( const string & str);
 		BigNum & operator = ( const BigNum & );
 		BigNum operator + ( const BigNum & ) const;
 		BigNum operator - ( const BigNum & ) const;
@@ -34,12 +41,11 @@ class BigNum : public Token
 		const bool IsOperator ( void ) const { return false; }
 		//void Print( void ) const;
 		friend ostream & operator << ( ostream &, const BigNum & );
-		~BigNum();
+		~BigNum(){};
 	private:
-		int * number;
+		deque <int> number;
 		int exp;
-		int n_parts; 
-		int sign; // -1 for negative, +1 for positive
+		bool sign;
 		int checkBoundaries(const int & i, const BigNum & a, const int & min, const int & max) const;
 };
 

@@ -11,6 +11,10 @@ using namespace std;
 
 int main( int argc, char * argv [] )
 {
+//	string x;
+//	cin >> x;
+//	BigNum a (x);
+// 1233133 255435345 .213134253 534535353
 	Calculator calc;
 	string str;
 	if ( argc > 1 )
